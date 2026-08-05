@@ -1,0 +1,113 @@
+---
+title: Active Lobbies
+description: Live lobby posts, draft details, map thumbnails, notifications, and result disputes.
+---
+
+The active-lobby feature maintains one Discord message for each visible lobby. When no lobby is visible, it maintains one empty-state message instead.
+
+## What a lobby post contains
+
+A post can include:
+
+- the Battlevive lobby name, linked to the match when a complete match URL is available;
+- a compact summary such as `3v3 · EU · Draft · Step 3`;
+- two team columns;
+- captain markers;
+- clickable Discord roster mentions or Battlevive-name fallbacks;
+- ordered picks and bans;
+- selected-map text and an optional map thumbnail;
+- result-confirmation progress after the lobby ends.
+
+Map-ban history is not displayed. Missing champion emojis or map artwork do not prevent the post from working because readable text remains visible.
+
+## Setup
+
+1. Deploy the bot version containing migration `08_active_lobbies.sql`.
+2. Apply the migration manually to an existing database volume.
+3. Run `/create_roles`.
+4. Assign `Active Lobby` to interested members.
+5. Assign `Website Moderator` to staff who resolve disputed results.
+6. Grant the required channel permissions.
+7. Run `/config active_lobbies channel`.
+8. Optionally select custom notification roles.
+
+## Required permissions
+
+In the active-lobby channel, the bot needs:
+
+- View Channel;
+- Send Messages;
+- Embed Links;
+- Attach Files;
+- Read Message History;
+- Mention @everyone, @here, and All Roles.
+
+## Notification behavior
+
+Existing lobbies are posted silently when the feature is first configured. Later newly observed lobbies can mention the configured `Active Lobby` role once.
+
+When a posted lobby first becomes disputed, the replacement post can mention the configured `Website Moderator` role once.
+
+Roster mentions inside embeds are clickable but do not ping players.
+
+Edits, restarts, channel moves, deleted-message recovery, resets, and status reversals do not intentionally repeat a handled notification. Delivery is best effort rather than transactionally exactly once, so a crash after Discord accepts a message but before PostgreSQL records it can still produce a duplicate on retry.
+
+## Result confirmation
+
+For ended lobbies:
+
+- no votes means both captains are pending;
+- one vote displays that captain's selected winner while waiting for the other;
+- matching latest votes resolve the result;
+- different latest votes display a disputed state and keep the post visible.
+
+Before removing a resolved post, the bot persists the final ordered picks and bans. A moderator-selected authoritative `winner_slot` also closes the lobby after final draft persistence succeeds.
+
+## Polling and synchronization
+
+The normal lobby, roster, and season-rating refresh runs every 30 seconds.
+
+Detailed active-lobby polling runs globally every five seconds only when:
+
+- at least one server has an active-lobby channel configured; and
+- the local database contains a relevant lobby candidate.
+
+This polling is global and does not multiply upstream requests by the number of configured servers.
+
+## Champion emojis
+
+Champion emojis are optional Discord application emojis. Upload normalized PNG files from:
+
+```text
+app/assets/champion-emojis
+```
+
+Names are matched case-insensitively and with separator normalization. Restart the bot after uploading emojis if it has already cached the application emoji list.
+
+## Map thumbnails
+
+Bundled map thumbnails are selected through the asset manifest. Unknown aliases or missing files leave the map name visible without a thumbnail.
+
+Review `app/assets/THIRD_PARTY_ASSETS.md` before redistributing bundled Battlerite assets.
+
+## Troubleshooting
+
+### Posts are missing or stale
+
+- Confirm migration `08_active_lobbies.sql` was applied.
+- Run `/config show` and verify the configured channel and roles.
+- Check the 30-second lobby refresh and five-second detail polling logs.
+- Recheck all channel permissions.
+- Confirm `BATTLEVIVE_URL` is a valid HTTPS base URL without credentials, query parameters, or a fragment.
+
+### A roster says `No roster available`
+
+The 30-second snapshot must successfully fetch ordered `lobby_slots`. Check upstream refresh errors and verify referenced users exist locally.
+
+### A role notification is missing
+
+Confirm the selected role still exists, is not integration-managed, and the bot has permission to mention roles in that channel. Initial configuration intentionally establishes a silent baseline.
+
+### A disputed lobby remains visible
+
+This is expected until a valid authoritative winner is available and final draft persistence succeeds.

@@ -1,0 +1,81 @@
+---
+title: Development
+description: Project layout, validation, data flow, dependencies, CI, and contributor rules.
+---
+
+## Project layout
+
+- `app/main.py` - entry point.
+- `app/battlevive_bot/battlevive/client.py` - high-level asynchronous Battlevive client and response parsing.
+- `app/battlevive_bot/battlevive/supabase.py` - Supabase REST and authentication transport.
+- `app/battlevive_bot/battlevive/tokens.py` - token validation and atomic persistent storage.
+- `app/battlevive_bot/active_lobbies.py` - active-lobby polling, result evaluation, Discord reconciliation, and embed construction.
+- `app/battlevive_bot/asset_manifest.py` - map asset manifest and lookup.
+- `app/battlevive_bot/` - Discord orchestration, database access, rendering, roles, models, logging, and settings.
+- `app/init-db/` - numbered PostgreSQL schema and migration files.
+- `app/assets/` - fonts, rank art, maps, champion emoji sources, and attribution.
+- `app/data/` and `app/logs/` - runtime state.
+- `utils/` - setup and environment-generation helpers.
+- `tests/` - pytest suite.
+- `app/requirements.txt` - direct runtime dependencies.
+- `app/requirements.lock` - fully resolved hashed dependency lock.
+
+## Validation
+
+```bash
+python -m compileall app utils
+pytest
+docker compose -f docker-compose.dev.yml up -d --build
+```
+
+Default pytest discovery must remain CI-safe. Browser login, real Discord calls, and real Battlevive calls belong behind an explicit manual integration gate.
+
+## Refresh intervals
+
+- tokens: every 30 minutes and after HTTP 401;
+- users: hourly;
+- lobbies, lobby slots, and season ratings: every 30 seconds;
+- active-lobby details: every five seconds only while needed.
+
+An unauthorized API request is retried once after token refresh.
+
+## Data ownership
+
+`users.discord_id` is local bot-owned state. Synchronization must preserve it and must not overwrite it from upstream payloads.
+
+Use `BattleviveClient` rather than adding Supabase transport directly to Discord command code. Keep endpoint transport in `supabase.py`, token persistence in `tokens.py`, and parsing behind client methods.
+
+## Dependency changes
+
+After editing `app/requirements.txt`, regenerate the lock:
+
+```bash
+uv pip compile app/requirements.txt \
+  --output-file app/requirements.lock \
+  --generate-hashes \
+  --python-version 3.14 \
+  --universal
+```
+
+Commit both files together and verify that the lock remains installable for Linux AMD64 and ARM64 Alpine builds.
+
+## Continuous integration
+
+The `Test and Publish` workflow runs compile checks and pytest before building images.
+
+Pull requests build AMD64 and ARM64 images without pushing. Successful pushes to `main` publish:
+
+- `voxix/battlevive-bot:latest`;
+- `voxix/battlevive-bot:sha-<full-commit-sha>`.
+
+A failed test or platform build must not replace the existing `latest` image.
+
+## Database changes
+
+Add numbered, idempotent SQL files under `app/init-db/`.
+
+Fresh databases run the full sequence automatically. Existing databases require missing files to be applied manually in filename order. Update the database documentation whenever persistence changes.
+
+## Assets
+
+Review `app/assets/THIRD_PARTY_ASSETS.md` before modifying or redistributing bundled Battlerite material.

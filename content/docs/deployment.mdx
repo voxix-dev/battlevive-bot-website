@@ -1,0 +1,115 @@
+---
+title: Deployment
+description: Deploy, upgrade, roll back, and operate Battlevive Bot with Docker or Podman Compose.
+---
+
+## Requirements
+
+- Docker or Podman with Compose support;
+- a Discord bot token;
+- Battlevive and Supabase API credentials;
+- PostgreSQL credentials.
+
+## Initial setup
+
+```bash
+cd utils
+cp .env.example .env
+# Fill the required values in .env
+./init.sh
+```
+
+The setup script installs helper dependencies and Chromium, opens the Discord login flow, generates the root `.env`, and initializes `app/data/battlevive_tokens.json`.
+
+Both generated files contain secrets.
+
+## Start the services
+
+From the repository root:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Podman equivalent:
+
+```bash
+podman compose pull
+podman compose up -d
+```
+
+The production Compose file uses the public `voxix/battlevive-bot:latest` image. Published images support Linux AMD64 and ARM64.
+
+## Services and persistent data
+
+Compose defines:
+
+- `bot`, mounting `./app/data:/app/data` and `./app/logs:/app/logs`;
+- `db`, using PostgreSQL 18, loading bootstrap SQL from `./app/init-db`, and storing data under `./app/data/postgresql`.
+
+PostgreSQL binds to `127.0.0.1:5432` for local host access. Bot-to-database traffic uses `db:5432` on the internal Compose network.
+
+The bot waits for the PostgreSQL healthcheck before starting.
+
+### SELinux hosts
+
+The overlapping bot-data and PostgreSQL mounts intentionally use the shared `:z` label. Keep both mounts on `:z`. Changing either to private `:Z` can prevent PostgreSQL from accessing its files after another container relabels the parent directory.
+
+## Logs
+
+Follow bot logs:
+
+```bash
+docker compose logs -f bot
+```
+
+or:
+
+```bash
+podman compose logs -f bot
+```
+
+The bot also writes rotating files under `app/logs`. Bot and Discord logs rotate at 5 MiB with three backups.
+
+## Upgrade
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Before recreating the services, inspect release notes and manually apply any new numbered SQL migrations to existing database volumes. The bot does not run migrations.
+
+## Rollback
+
+Every published commit has an immutable image tag:
+
+```text
+voxix/battlevive-bot:sha-<full-commit-sha>
+```
+
+Pin the required tag in `docker-compose.yml`, then recreate only the bot:
+
+```bash
+docker compose pull bot
+docker compose up -d --no-deps bot
+```
+
+Keep the SHA tag pinned until deliberately returning to `latest`.
+
+## Local source build
+
+Use the development Compose file:
+
+```bash
+docker compose -f docker-compose.dev.yml up -d --build
+```
+
+It builds and tags `battlevive-bot:local`. Do not add a local build context to the production `docker-compose.yml`.
+
+## Database migrations
+
+Fresh PostgreSQL volumes automatically execute all numbered files under `app/init-db/`.
+
+Existing volumes do not rerun initialization scripts. Apply missing files manually and in numeric order with `psql -v ON_ERROR_STOP=1` after taking a backup.

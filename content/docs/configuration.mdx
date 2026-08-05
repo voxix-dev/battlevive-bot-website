@@ -1,0 +1,72 @@
+---
+title: Configuration
+description: Server-level configuration, permissions, and environment settings.
+---
+
+Configuration is split between Discord server settings and deployment environment variables.
+
+## Discord server configuration
+
+Each server has an independent `guild_config` row.
+
+Use `/config show` to display:
+
+- leaderboard channel and limit;
+- active-lobby channel;
+- new-lobby notification role;
+- Website Moderator role;
+- debug-export status.
+
+<Cards>
+  <Card title="Leaderboard" href="/docs/leaderboard" description="Channel, size, update behavior, and troubleshooting." />
+  <Card title="Active lobbies" href="/docs/active-lobbies" description="Channel, roles, notifications, and live-post behavior." />
+  <Card title="Commands" href="/docs/commands" description="Exact configuration command reference." />
+</Cards>
+
+## Deployment environment
+
+Create `utils/.env` from `utils/.env.example`, then run `utils/init.sh` to generate the root `.env` and the persisted Battlevive token file.
+
+The deployment expects:
+
+- `DISCORD_TOKEN`;
+- `DISCORD_COMMAND_GUILD_ID` - optional;
+- `SUPABASE_URL`;
+- `SUPABASE_API_KEY`;
+- `BATTLEVIVE_URL`;
+- `LOG_LEVEL`;
+- `DISCORD_LOG_LEVEL`;
+- `POSTGRES_USER`;
+- `POSTGRES_PASSWORD`;
+- `POSTGRES_DB`;
+- `DATABASE_URL`.
+
+The setup helper also creates `BOOTSTRAP_JWT` and `BOOTSTRAP_REFRESH_TOKEN` in the generated root `.env`.
+
+## Command registration
+
+Leave `DISCORD_COMMAND_GUILD_ID` blank in production to register commands globally.
+
+Set it to one positive Discord guild snowflake during development for faster guild-scoped synchronization. Invalid values stop startup. Global command changes can take longer to appear in Discord.
+
+## URL validation
+
+`SUPABASE_URL` must use HTTPS and must not contain embedded credentials.
+
+`BATTLEVIVE_URL` must:
+
+- use HTTPS;
+- contain no embedded credentials;
+- contain no query string;
+- contain no fragment.
+
+It is used to construct active-lobby match links.
+
+## Secrets
+
+Never commit or share:
+
+- either `.env` file;
+- `app/data/battlevive_tokens.json`;
+- Discord or Supabase tokens;
+- bootstrap access or refresh tokens.

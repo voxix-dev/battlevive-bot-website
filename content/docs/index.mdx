@@ -1,13 +1,21 @@
 ---
-title: Battlevive Bot Documentation
-description: This Is documentation to battlevive bot
+title: Battlevive Bot
+description: Discord integration for Battlevive players, rankings, lobbies, and server updates.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+Battlevive Bot synchronizes Battlevive player, lobby, season-rating, and leaderboard data with Discord.
 
-## What is Next?
+It can manage player and rank roles, generate rank cards, publish leaderboard images, and maintain live lobby posts with draft and result information.
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Rank cards" description="Display your current rank, MMR progress, wins, and losses." href="/docs/rank-cards" />
+  <Card title="Roles and identity" description="Learn how Battlevive accounts are linked to Discord members and how roles are synchronized." href="/docs/roles-and-identity" />
+  <Card title="Leaderboard" description="Configure and operate the server leaderboard." href="/docs/leaderboard" />
+  <Card title="Active lobbies" description="Post live lobby, draft, map, and result-confirmation updates." href="/docs/active-lobbies" />
+  <Card title="Commands" description="Reference for every Discord command." href="/docs/commands" />
+  <Card title="Deployment" description="Deploy and maintain the bot with Docker or Podman Compose." href="/docs/deployment" />
 </Cards>
+
+## Important limitation
+
+When trustworthy upstream Discord IDs are unavailable, the bot may link a Battlevive user through an unambiguous username or display-name match. This fallback is not identity verification. Use it only in trusted or testing communities until the upstream API provides trustworthy Discord identity data.

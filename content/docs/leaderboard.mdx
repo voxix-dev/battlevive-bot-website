@@ -1,0 +1,71 @@
+---
+title: Leaderboard
+description: Configure and operate per-server Battlevive leaderboard images.
+---
+
+Battlevive Bot can publish and update leaderboard images in a configured Discord channel.
+
+The leaderboard uses the current Battlevive season, determined from the most recently updated season-rating data. Only Battlevive users matched to members of the Discord server are included.
+
+## Required permissions
+
+In the selected channel, the bot needs:
+
+- View Channel;
+- Send Messages;
+- Attach Files;
+- Read Message History.
+
+## Configure the channel
+
+Run:
+
+```text
+/config leaderboard channel
+```
+
+Select a text or announcement channel. The bot validates its channel permissions before storing the setting.
+
+## Configure the size
+
+Run:
+
+```text
+/config leaderboard limit
+```
+
+Accepted values are `1` through `50`. Omitting the amount uses the maximum of `50`.
+
+## Reset the leaderboard
+
+Run:
+
+```text
+/config reset leaderboard
+```
+
+This clears the server's leaderboard channel and limit and requests reconciliation of managed leaderboard messages.
+
+## How updates work
+
+Each Discord server has an independent configuration. Message metadata is stored in PostgreSQL, while complete rendered PNG files are stored under:
+
+```text
+app/data/leaderboards/<guild_id>/
+```
+
+Changes to rating or user-link data request an update through PostgreSQL notifications. Periodic reconciliation also runs as recovery for missed notifications.
+
+## Troubleshooting
+
+### Channel cannot be configured
+
+Only text and announcement channels are accepted. Check all required channel permissions, including channel-specific overrides.
+
+### Limit is rejected
+
+Use a value from `1` through `50`, or omit the value to use `50`.
+
+### Leaderboard is stale
+
+Run `/refresh`, inspect the bot logs, and confirm the database and Battlevive API are reachable. Also verify that the bot can read message history and upload attachments in the configured channel.

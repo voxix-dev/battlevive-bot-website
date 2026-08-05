@@ -1,0 +1,95 @@
+---
+title: Database
+description: PostgreSQL tables, relationships, ownership rules, and migration behavior.
+---
+
+Battlevive Bot stores synchronized Battlevive data and per-server Discord state in PostgreSQL.
+
+## Core tables
+
+### `users`
+
+Stores Battlevive users and the locally resolved Discord ID.
+
+Important rule: `discord_id` is bot-owned local state and must never be overwritten by upstream synchronization.
+
+### `season_ratings`
+
+Stores one rating row per user and season.
+
+Unique key:
+
+```text
+(user_id, season_year, season_number)
+```
+
+### `lobbies`
+
+Stores the authoritative 30-second lobby snapshot, including lobby metadata, status, result state, match-link components, map selection, and tournament fields.
+
+### `lobby_rosters`
+
+Stores one row for each `(lobby_id, team)` pair.
+
+It contains:
+
+- captain ID;
+- ordered roster user IDs;
+- ordered final picks;
+- ordered final bans;
+- final-draft persistence timestamp.
+
+Map-ban actions are deliberately excluded from stored champion bans.
+
+## Discord server state
+
+### `guild_config`
+
+Stores one independent configuration row per Discord server, including:
+
+- leaderboard channel and limit;
+- debug-export flag;
+- active-lobby channel;
+- new-lobby notification role;
+- Website Moderator role;
+- active-lobby baseline state.
+
+### `leaderboard_slots`
+
+Stores leaderboard message mappings, rendered-content fingerprints, season metadata, and cached user slots.
+
+Complete PNG files are stored on disk rather than inside PostgreSQL.
+
+### `active_lobby_posts`
+
+Stores the current Discord message mapping and durable notification history for each lobby and guild.
+
+Clearing a message mapping does not erase first-seen or handled-notification history. This prevents normal recovery operations from intentionally repeating role pings.
+
+### `active_lobby_empty_posts`
+
+Tracks the single per-guild empty-state message.
+
+### `active_lobby_obsolete_posts`
+
+Queues old Discord message references for cleanup. Failed deletions remain queued and are retried.
+
+When a lobby disappears from the authoritative upstream list, live Discord references are copied here before the local lobby and roster rows are deleted.
+
+## Write order
+
+Synchronize `users` before `lobbies`, `lobby_rosters`, and `season_ratings`, because those records reference local users.
+
+Reject roster user IDs that are not already present locally before writing roster arrays.
+
+## Migrations
+
+Schema files are numbered and stored under:
+
+```text
+app/init-db/
+```
+
+Fresh PostgreSQL volumes execute all files automatically. Existing volumes require missing migrations to be applied manually and in numeric order.
+
+The bot image does not execute migrations.

@@ -1,0 +1,78 @@
+---
+title: Troubleshooting
+description: Common startup, API, database, command, role, leaderboard, and active-lobby failures.
+---
+
+## Bot container does not start
+
+- Check `docker compose logs -f bot` or `podman compose logs -f bot`.
+- Confirm the generated root `.env` exists.
+- Confirm required values are present, especially `DISCORD_TOKEN`, `SUPABASE_API_KEY`, `POSTGRES_PASSWORD`, and `DATABASE_URL`.
+- Confirm `app/data/battlevive_tokens.json` contains a valid token pair, or both bootstrap token variables exist.
+- Confirm the database service is healthy.
+
+Do not print or paste real environment files or token files while diagnosing startup.
+
+## Credentials are missing or invalid
+
+The bot first reads the persisted token file. If it is absent or invalid, both bootstrap token variables are required.
+
+Regenerate credentials through the supported setup flow:
+
+```bash
+cd utils
+cp .env.example .env
+./init.sh
+```
+
+## Battlevive requests repeatedly return 401
+
+The client refreshes tokens after the first 401 and retries once. Repeated failures usually mean the refresh token is rejected or the persisted token file cannot be updated.
+
+Regenerate credentials and confirm `/app/data` is writable and persistent.
+
+## Database service is unhealthy
+
+- Check `docker compose logs -f db`.
+- Confirm `POSTGRES_PASSWORD` is set.
+- Confirm bot traffic uses `db:5432`, not the host-only `127.0.0.1:5432` binding.
+- Confirm required migrations were applied.
+
+On SELinux hosts, PostgreSQL permission errors after recreating the bot can be caused by mismatched labels on overlapping mounts. Use shared `:z` labels on both mounts. Do not delete the database directory or recursively change its ownership for this error.
+
+## Slash command fails
+
+Inspect `app/logs/` or container logs. Typical causes are:
+
+- missing Discord permissions;
+- unavailable Battlevive or Supabase credentials;
+- database connectivity failures.
+
+## Slash commands are missing or stale
+
+Leave `DISCORD_COMMAND_GUILD_ID` blank for production global registration. Global updates can take time.
+
+During development, set it to a positive guild snowflake and restart the bot for rapid guild-scoped registration.
+
+## Existing database volume lacks schema changes
+
+Apply missing idempotent files manually and in numeric order:
+
+```bash
+psql "$DATABASE_URL" -f app/init-db/04_guild_config.sql
+psql "$DATABASE_URL" -f app/init-db/05_leaderboards.sql
+psql "$DATABASE_URL" -f app/init-db/06_leaderboard_disk_cache.sql
+psql "$DATABASE_URL" -f app/init-db/07_debug_commands.sql
+psql "$DATABASE_URL" -f app/init-db/08_active_lobbies.sql
+```
+
+Use a backup-first procedure and `psql -v ON_ERROR_STOP=1` in production.
+
+## Feature-specific troubleshooting
+
+<Cards>
+  <Card title="Rank cards" href="/docs/rank-cards" description="Registration and account-link errors." />
+  <Card title="Roles and identity" href="/docs/roles-and-identity" description="Role hierarchy, permissions, and matching failures." />
+  <Card title="Leaderboard" href="/docs/leaderboard" description="Channel, limit, and stale-image failures." />
+  <Card title="Active lobbies" href="/docs/active-lobbies" description="Missing posts, notifications, rosters, maps, and disputes." />
+</Cards>

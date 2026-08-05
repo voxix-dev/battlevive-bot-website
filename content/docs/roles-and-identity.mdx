@@ -1,0 +1,55 @@
+---
+title: Roles and Identity
+description: Account linking, player roles, rank roles, and role-management requirements.
+---
+
+Battlevive Bot can assign two kinds of synchronized roles:
+
+- `Battlevive Player` for matched Battlevive users;
+- one rank role based on the player's current-season MMR.
+
+It can also create two notification roles:
+
+- `Active Lobby` for members who want new-lobby notifications;
+- `Website Moderator` for staff who resolve disputed results.
+
+The bot does not automatically enroll members in either notification role.
+
+## Create the roles
+
+Run `/create_roles` with **Manage Roles** permission.
+
+The bot validates both its own permissions and Discord role hierarchy. Its highest role must be above every role it needs to create, edit, or assign.
+
+Existing Battlevive-named roles are accepted only when they are:
+
+- unprivileged;
+- not managed by an integration;
+- assignable by the bot;
+- below the bot's highest role.
+
+Unsafe existing roles are rejected rather than silently reused.
+
+## Identity matching
+
+The bot first uses a previously stored Discord ID when available.
+
+Otherwise it attempts to match the Battlevive `discord_username` against Discord account names and unambiguous display, global, or nickname values. A successful fallback match is stored locally for future synchronizations.
+
+<Callout type="warn" title="Temporary identity risk">
+  Username and display-name matching is not identity verification. Do not rely on it in untrusted production communities.
+</Callout>
+
+## Role synchronization
+
+Run `/refresh` after creating roles or changing permissions. Manual refresh updates roles only in the server where the command was invoked.
+
+When a member joins, the bot reconciles that member's roles from the local PostgreSQL database. A join does not trigger a Battlevive API request.
+
+## Roles are not assigned
+
+- Confirm the bot has **Manage Roles**.
+- Move the bot's highest role above the roles it must manage.
+- Run `/create_roles`.
+- Run `/refresh`.
+- Inspect bot logs for member-matching or Discord permission failures.
