@@ -31,7 +31,7 @@ export default function HomePage() {
           </p>
 
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <LandingButton href="/add_bot">Add Bot</LandingButton>
+            <LandingButton href="/add-bot" target= "_blank">Add Bot</LandingButton>
             <LandingButton href="/docs" variant="secondary">
               Read the docs
             </LandingButton>
@@ -64,27 +64,6 @@ export default function HomePage() {
           />
         </div>
       </LandingSection>
-
-      <section className="px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
-        <div className="mx-auto flex w-full max-w-[1180px] flex-col items-start justify-between gap-8 rounded-xl border border-fd-border bg-fd-card p-7 shadow-sm sm:p-10 lg:flex-row lg:items-center">
-          <div className="max-w-2xl">
-            <h2 className="text-balance text-3xl font-bold leading-tight tracking-[-0.04em] sm:text-4xl">
-              Bring BattleVive competition into Discord.
-            </h2>
-            <p className="mt-3 leading-7 text-fd-muted-foreground">
-              Add the bot to your server or continue to the documentation for
-              setup and command details.
-            </p>
-          </div>
-
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <LandingButton href="/add_bot">Add Bot</LandingButton>
-            <LandingButton href="/docs" variant="secondary">
-              Docs
-            </LandingButton>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }
