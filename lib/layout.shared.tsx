@@ -1,8 +1,12 @@
 import Image from 'next/image';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+import { AddBotButton } from '@/components/add-bot-button';
 import { appName, gitConfig } from './shared';
 
 export function baseOptions(): BaseLayoutProps {
+  const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
+
   return {
     nav: {
       title: (
@@ -15,12 +19,13 @@ export function baseOptions(): BaseLayoutProps {
             className="size-7"
           />
 
-          <span className="font-semibold text-battlevive-purple">
+          <span className="font-bold text-foregound ">
             {appName}
           </span>
         </div>
       ),
     },
+
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
 }
