@@ -32,7 +32,7 @@ export default function HomePage() {
           </p>
 
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <LandingButton href="/add_bot">Add Bot</LandingButton>
+            <LandingButton href="/add-bot">Add Bot</LandingButton>
             <LandingButton href="/docs" variant="secondary">
               Read the docs
             </LandingButton>
