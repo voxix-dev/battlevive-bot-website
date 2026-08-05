@@ -1,4 +1,4 @@
-export const appName = 'Battlevive Bot';
+export const appName = 'BattleVive Bot';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
