@@ -1,4 +1,4 @@
-import { Reveal } from '../../components/reveal';
+import { Reveal } from '@/components/reveal';
 import { DiscordRankPreview } from './_components/discord-rank-preview';
 import { ImageShowcase } from './_components/image-showcase';
 import { LandingButton } from './_components/landing-button';
@@ -32,14 +32,14 @@ export default function HomePage() {
           </p>
 
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <LandingButton href="/add-bot">Add Bot</LandingButton>
+            <LandingButton href="/add-bot" target= "_blank">Add Bot</LandingButton>
             <LandingButton href="/docs" variant="secondary">
               Read the docs
             </LandingButton>
           </div>
         </div>
       </LandingSection>
-      <Reveal as="section">
+      <Reveal>
         <LandingSection id="rank-card">
           <div className="grid items-center gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
             <SectionHeading

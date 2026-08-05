@@ -5,12 +5,14 @@ type LandingButtonProps = {
   children: ReactNode;
   href: string;
   variant?: 'primary' | 'secondary';
+  target?: '_blank'|'_self'|'_parent'|'_top';
 };
 
 export function LandingButton({
   children,
   href,
   variant = 'primary',
+  target = '_self',
 }: LandingButtonProps) {
   const baseClasses =
     'inline-flex min-h-11 items-center justify-center rounded-lg px-5 text-sm font-semibold transition duration-150 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-offset-2 focus-visible:ring-offset-fd-background';
@@ -21,7 +23,7 @@ export function LandingButton({
       : 'border border-fd-border bg-fd-card text-fd-foreground shadow-sm hover:bg-fd-muted';
 
   return (
-    <Link href={href} className={`${baseClasses} ${variantClasses}`}>
+    <Link href={href} target ={target} className={`${baseClasses} ${variantClasses}`}>
       {children}
     </Link>
   );
