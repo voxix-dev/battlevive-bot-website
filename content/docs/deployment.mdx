@@ -21,8 +21,6 @@ cp .env.example .env
 
 The setup script installs helper dependencies and Chromium, opens the Discord login flow, generates the root `.env`, and initializes `app/data/battlevive_tokens.json`.
 
-Both generated files contain secrets.
-
 ## Start the services
 
 From the repository root:
@@ -79,8 +77,6 @@ docker compose pull
 docker compose up -d
 ```
 
-Before recreating the services, inspect release notes and manually apply any new numbered SQL migrations to existing database volumes. The bot does not run migrations.
-
 ## Rollback
 
 Every published commit has an immutable image tag:
@@ -107,9 +103,3 @@ docker compose -f docker-compose.dev.yml up -d --build
 ```
 
 It builds and tags `battlevive-bot:local`. Do not add a local build context to the production `docker-compose.yml`.
-
-## Database migrations
-
-Fresh PostgreSQL volumes automatically execute all numbered files under `app/init-db/`.
-
-Existing volumes do not rerun initialization scripts. Apply missing files manually and in numeric order with `psql -v ON_ERROR_STOP=1` after taking a backup.

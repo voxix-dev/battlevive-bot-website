@@ -5,6 +5,20 @@ description: Live lobby posts, draft details, map thumbnails, notifications, and
 
 The active-lobby feature maintains one Discord message for each visible lobby. When no lobby is visible, it maintains one empty-state message instead.
 
+## Channel previews
+
+### No active lobbies
+
+![BattleVive Bot empty-state embed in the active-lobbies channel](/images/active-lobbies-no-lobbies.png)
+
+### Waiting for players
+
+![BattleVive lobby embed with open roster spots](/images/active-lobbies-not-full.png)
+
+### Draft in progress
+
+![BattleVive lobby embed showing teams, picks, bans, and the selected map](/images/active-lobbies-all-picks.png)
+
 ## What a lobby post contains
 
 A post can include:
@@ -22,14 +36,12 @@ Map-ban history is not displayed. Missing champion emojis or map artwork do not 
 
 ## Setup
 
-1. Deploy the bot version containing migration `08_active_lobbies.sql`.
-2. Apply the migration manually to an existing database volume.
-3. Run `/create_roles`.
-4. Assign `Active Lobby` to interested members.
-5. Assign `Website Moderator` to staff who resolve disputed results.
-6. Grant the required channel permissions.
-7. Run `/config active_lobbies channel`.
-8. Optionally select custom notification roles.
+1. Run `/create_roles`.
+2. Assign `Active Lobby` to interested members.
+3. Assign `Website Moderator` to staff who resolve disputed results.
+4. Grant the required channel permissions.
+5. Run `/config active_lobbies channel`.
+6. Optionally select custom notification roles.
 
 ## Required permissions
 
@@ -94,7 +106,6 @@ Review `app/assets/THIRD_PARTY_ASSETS.md` before redistributing bundled Battleri
 
 ### Posts are missing or stale
 
-- Confirm migration `08_active_lobbies.sql` was applied.
 - Run `/config show` and verify the configured channel and roles.
 - Check the 30-second lobby refresh and five-second detail polling logs.
 - Recheck all channel permissions.

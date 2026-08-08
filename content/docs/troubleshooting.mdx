@@ -11,8 +11,6 @@ description: Common startup, API, database, command, role, leaderboard, and acti
 - Confirm `app/data/battlevive_tokens.json` contains a valid token pair, or both bootstrap token variables exist.
 - Confirm the database service is healthy.
 
-Do not print or paste real environment files or token files while diagnosing startup.
-
 ## Credentials are missing or invalid
 
 The bot first reads the persisted token file. If it is absent or invalid, both bootstrap token variables are required.
@@ -36,7 +34,6 @@ Regenerate credentials and confirm `/app/data` is writable and persistent.
 - Check `docker compose logs -f db`.
 - Confirm `POSTGRES_PASSWORD` is set.
 - Confirm bot traffic uses `db:5432`, not the host-only `127.0.0.1:5432` binding.
-- Confirm required migrations were applied.
 
 On SELinux hosts, PostgreSQL permission errors after recreating the bot can be caused by mismatched labels on overlapping mounts. Use shared `:z` labels on both mounts. Do not delete the database directory or recursively change its ownership for this error.
 
@@ -53,20 +50,6 @@ Inspect `app/logs/` or container logs. Typical causes are:
 Leave `DISCORD_COMMAND_GUILD_ID` blank for production global registration. Global updates can take time.
 
 During development, set it to a positive guild snowflake and restart the bot for rapid guild-scoped registration.
-
-## Existing database volume lacks schema changes
-
-Apply missing idempotent files manually and in numeric order:
-
-```bash
-psql "$DATABASE_URL" -f app/init-db/04_guild_config.sql
-psql "$DATABASE_URL" -f app/init-db/05_leaderboards.sql
-psql "$DATABASE_URL" -f app/init-db/06_leaderboard_disk_cache.sql
-psql "$DATABASE_URL" -f app/init-db/07_debug_commands.sql
-psql "$DATABASE_URL" -f app/init-db/08_active_lobbies.sql
-```
-
-Use a backup-first procedure and `psql -v ON_ERROR_STOP=1` in production.
 
 ## Feature-specific troubleshooting
 
