@@ -35,25 +35,33 @@ export function Reveal({
       '(prefers-reduced-motion: reduce)',
     ).matches;
 
-    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-      setIsVisible(true);
+    if (prefersReducedMotion) {
       return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      const animationFrame = requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+
+      return () => {
+        cancelAnimationFrame(animationFrame);
+      };
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
 
-        if (!entry?.isIntersecting) {
+        if (!entry) {
           return;
         }
 
-        setIsVisible(true);
-        observer.unobserve(element);
+        setIsVisible(entry.isIntersecting);
       },
       {
-        rootMargin: '0px 0px -12% 0px',
-        threshold: 0.12,
+        rootMargin: '-18% 0px -24% 0px',
+        threshold: 0.08,
       },
     );
 

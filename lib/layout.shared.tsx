@@ -5,8 +5,6 @@ import { AddBotButton } from '@/components/add-bot-button';
 import { appName, gitConfig } from './shared';
 
 export function baseOptions(): BaseLayoutProps {
-  const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
-
   return {
     nav: {
       title: (

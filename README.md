@@ -1,45 +1,34 @@
-# battlevive-bot-website
+# BattleVive Bot website
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+The website and documentation hub for
+[BattleVive Bot](https://github.com/voxix-dev/battlevive-bot), a Discord bot
+that brings BattleVive competition directly into community servers.
 
-Run development server:
+The site introduces the bot's player rank cards, synchronized Discord roles,
+season leaderboards, and active-lobby channel. The documentation covers setup,
+configuration, commands, deployment, and development of the bot itself.
 
-```bash
-npm run dev
-# or
-pnpm dev
-# or
-yarn dev
-```
+## Stack
 
-Open http://localhost:3000 with your browser to see the result.
+- Next.js 16 and React
+- TypeScript
+- Tailwind CSS
+- Fumadocs and MDX
+- Static export hosted on Cloudflare
 
-## Explore
+## Repository layout
 
-In the project, you can see:
+- `app/(home)/` contains the landing page and its presentation components.
+- `app/docs/` contains the documentation routes and layouts.
+- `content/docs/` contains the documentation source in MDX.
+- `components/` contains shared interface components.
+- `lib/` contains shared content, source, and layout helpers.
+- `public/images/` contains screenshots and other static artwork.
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
-- `lib/layout.shared.tsx`: Shared options for layouts, optional but preferred to keep.
+Documentation changes should be made in the corresponding file under
+`content/docs/`. Landing-page screenshots can be replaced in `public/images/`;
+when their dimensions change, update the explicit image metadata in the
+component that displays them so they retain the correct aspect ratio.
 
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
-
-### Fumadocs MDX
-
-Collections are defined with the [Macro API](https://fumadocs.dev/docs/mdx/macro) in `lib/source.ts`.
-
-Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
-
-## Learn More
-
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.dev) - learn about Fumadocs
+The project is statically exported. `.next/`, `.source/`, `out/`, and
+`.wrangler/` are generated directories and are not source files.

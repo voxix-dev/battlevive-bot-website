@@ -12,7 +12,7 @@ description: Project layout, validation, data flow, dependencies, CI, and contri
 - `app/battlevive_bot/active_lobbies.py` - active-lobby polling, result evaluation, Discord reconciliation, and embed construction.
 - `app/battlevive_bot/asset_manifest.py` - map asset manifest and lookup.
 - `app/battlevive_bot/` - Discord orchestration, database access, rendering, roles, models, logging, and settings.
-- `app/init-db/` - numbered PostgreSQL schema and migration files.
+- `app/init-db/` - PostgreSQL initialization schema.
 - `app/assets/` - fonts, rank art, maps, champion emoji sources, and attribution.
 - `app/data/` and `app/logs/` - runtime state.
 - `utils/` - setup and environment-generation helpers.
@@ -69,12 +69,6 @@ Pull requests build AMD64 and ARM64 images without pushing. Successful pushes to
 - `voxix/battlevive-bot:sha-<full-commit-sha>`.
 
 A failed test or platform build must not replace the existing `latest` image.
-
-## Database changes
-
-Add numbered, idempotent SQL files under `app/init-db/`.
-
-Fresh databases run the full sequence automatically. Existing databases require missing files to be applied manually in filename order. Update the database documentation whenever persistence changes.
 
 ## Assets
 
