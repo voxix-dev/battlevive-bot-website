@@ -72,6 +72,8 @@ The bot also writes rotating files under `app/logs`. Bot and Discord logs rotate
 
 ## Upgrade
 
+Before starting the new bot image against an existing PostgreSQL volume, apply `app/init-db/09_command_controls_and_identity_recovery.sql`. Fresh databases load it automatically. Migration 09 retains `users.discord_id`, so older bot images remain schema-compatible during rollback.
+
 ```bash
 docker compose pull
 docker compose up -d

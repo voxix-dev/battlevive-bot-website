@@ -15,7 +15,11 @@ Use `/config show` to display:
 - active-lobby channel;
 - new-lobby notification role;
 - Website Moderator role;
+- `/rank` cooldown, including whether it is disabled;
+- whitelisted and blacklisted public-command channels;
 - debug-export status.
+
+Public channel rules currently apply only to `/rank`. A block rule denies the channel. Otherwise, any live whitelist changes the default to deny; with no live whitelist, other channels remain allowed. Threads use their parent channel. Cooldowns are held in memory per user and guild, so a restart clears active windows.
 
 <Cards>
   <Card title="Leaderboard" href="/docs/leaderboard" description="Channel, size, update behavior, and troubleshooting." />

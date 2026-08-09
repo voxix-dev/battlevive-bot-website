@@ -3,11 +3,11 @@ title: Rank Cards
 description: Display a player's current Battlevive rank and season statistics in Discord.
 ---
 
-Use `/rank` to display your Battlevive rank card.
+Use `/rank` in a server to display your Battlevive rank card. DMs are not supported. Administrators can restrict public-command channels and configure a per-user cooldown from 0 through 3600 seconds; denied channels do not consume cooldown.
 
 ![BattleVive rank card returned by the rank command](/images/rank-card.png)
 
-The card is generated from the currently synchronized season-rating data and includes:
+The card is generated from the globally current season, selected by the most recently updated rating data, and includes:
 
 - current rank;
 - current MMR and rank progress;
@@ -16,7 +16,9 @@ The card is generated from the currently synchronized season-rating data and inc
 
 ## Registration errors
 
-When `/rank` responds with `You are not registered.`, the bot could not find a synchronized user linked to your Discord ID.
+On a local miss, the bot refreshes users and ratings once and retries. `You are not registered.` means a successful authoritative refresh confirmed that no active user matches. A retained recovery link without an active user is not registration.
+
+If the identity exists but has no rating in the current season, the bot reports that privately instead of calling the user unregistered. If upstream or PostgreSQL verification fails, it reports that verification is temporarily unavailable.
 
 Check that:
 

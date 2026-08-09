@@ -7,11 +7,11 @@ description: Complete Battlevive Bot slash-command reference.
 
 ### `/rank`
 
-Displays your Battlevive rank card. The card contains your current rank, MMR progress, wins, and losses from the synchronized season-rating data.
+Server-only public command that displays your Battlevive rank card from the globally current season, selected by the most recently updated rating data.
 
 ![BattleVive Bot response to the rank command](/images/rank-card.png)
 
-If the bot responds with `You are not registered.`, it has no synchronized Battlevive user linked to your Discord account. Confirm that your Battlevive account and Discord username are correct, then ask a server administrator to run `/refresh`.
+On a local identity miss, the bot coalesces a users-and-ratings refresh and retries. `You are not registered.` is returned only after that authoritative refresh confirms absence. Registered users without a current-season rating receive a separate private response; upstream or database failures report that verification is unavailable. Server cooldown and channel rules are checked first.
 
 ## Server management commands
 
@@ -23,7 +23,7 @@ The command:
 
 - refreshes Battlevive users, lobbies, and season ratings;
 - synchronizes the local database;
-- updates player and rank roles in the invoking server;
+- updates MMR tier roles in the invoking server;
 - requests leaderboard and active-lobby reconciliation.
 
 Only one manual refresh can run at a time.
@@ -32,12 +32,7 @@ Only one manual refresh can run at a time.
 
 Requires **Manage Roles** and can only be used inside a server.
 
-Creates or validates:
-
-- `Battlevive Player`;
-- all Battlevive rank roles;
-- `Active Lobby`;
-- `Website Moderator`.
+Creates or validates all MMR tier roles plus the `Active Lobby` and `Website Moderator` notification defaults. Notification roles created by the bot are ownership-tracked; custom and legacy same-named roles are never adopted for automatic deletion.
 
 The bot reports created, existing, rejected, and failed roles separately. Existing roles are accepted only when they are unprivileged, unmanaged, assignable, and below the bot's highest role.
 
@@ -45,7 +40,23 @@ The bot reports created, existing, rejected, and failed roles separately. Existi
 
 Requires **Manage Server**.
 
-Displays the server's current leaderboard channel and limit, active-lobby channel, notification roles, moderator role, and debug-export status.
+Displays the server's current leaderboard channel and limit, active-lobby channel, notification roles, moderator role, `/rank` cooldown, public-command whitelist and blacklist, and debug-export status. Long output is split across ephemeral follow-up messages.
+
+### `/config rank cooldown seconds:<0..3600>`
+
+Requires **Manage Server**. Sets the `/rank` cooldown per user and server. `0` disables it; the default is 20 seconds.
+
+### `/config commands whitelist channel:<channel>`
+
+Requires **Manage Server**. Adds or reclassifies a text or announcement channel as allowed. When any live allow rule exists, public commands are available only in allowed channels.
+
+### `/config commands blacklist channel:<channel>`
+
+Requires **Manage Server**. Adds or reclassifies a channel as blocked. A block rule always wins.
+
+### `/config commands remove channel:<channel>`
+
+Requires **Manage Server**. Removes the channel rule. Removing an unlisted channel is a successful no-op. Threads inherit their parent channel's rule, and deleted channels are ignored and cleaned from storage.
 
 ## Leaderboard configuration
 
@@ -99,7 +110,7 @@ Omit the role argument to restore the generated `Website Moderator` role. Assign
 
 ### `/config reset active_lobbies`
 
-Clears the active-lobby channel and notification-role settings and requests managed-post cleanup. Notification history is retained so resets and reconfiguration do not intentionally repeat old pings.
+Clears the active-lobby channel and notification-role settings and requests managed-post cleanup. Notification history is retained. Only ownership-tracked generated roles are deleted; failed deletions remain pending for later retries.
 
 ## Debug commands
 

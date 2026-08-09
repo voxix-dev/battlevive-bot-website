@@ -45,6 +45,14 @@ Inspect `app/logs/` or container logs. Typical causes are:
 - unavailable Battlevive or Supabase credentials;
 - database connectivity failures.
 
+For `/rank`, a channel-policy denial is private and does not start the cooldown. If the response asks you to wait, the accepted prior invocation consumed the configured cooldown even if later work failed. Administrators can inspect `/config show`, adjust channel rules, or temporarily set `/config rank cooldown seconds:0`.
+
+An ambiguous identity means multiple active upstream users match the same Discord member name. Correct the upstream names so the match is unique, then retry; the bot intentionally links neither account automatically.
+
+If notification-role configuration succeeds but deletion remains pending, restore Manage Roles and the correct role hierarchy, then rerun `/create_roles`, change the configured role again, or reset active-lobby configuration. Only the ownership-tracked generated role is retried.
+
+If an account was restored with the same UUID, run `/refresh` or retry `/rank`; the retained recovery link is rehydrated automatically. A different UUID is treated as new and does not recover historical ratings or lobby data.
+
 ## Slash commands are missing or stale
 
 Leave `DISCORD_COMMAND_GUILD_ID` blank for production global registration. Global updates can take time.
