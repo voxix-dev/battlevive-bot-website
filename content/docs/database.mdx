@@ -9,9 +9,13 @@ Battlevive Bot stores synchronized Battlevive data and per-server Discord state 
 
 ### `users`
 
-Stores Battlevive users and the locally resolved Discord ID.
+Stores only the active authoritative Battlevive user snapshot. `discord_id` remains a compatibility cache for active users and older bot images.
 
-Important rule: `discord_id` is bot-owned local state and must never be overwritten by upstream synchronization.
+Important rule: `discord_id` is bot-owned local state and must never be overwritten from the untrusted upstream field. A successful users response is authoritative, including an empty response: absent users are removed atomically, ratings cascade, lobby creator and captain references become null, and roster arrays are scrubbed. Fetch, parse, validation, or transaction failures do not delete users.
+
+### `user_discord_links`
+
+Canonical recovery mapping from upstream user UUID to a unique Discord ID. It deliberately has no foreign key to `users`, so a same-UUID account can recover its link after disappearing and later returning. A retained link alone grants no membership, rank command access, leaderboard entry, or role. New links are dual-written to this table and the active-user cache under a Discord-ID advisory lock.
 
 ### `season_ratings`
 
@@ -53,6 +57,15 @@ Stores one independent configuration row per Discord server, including:
 - new-lobby notification role;
 - Website Moderator role;
 - active-lobby baseline state.
+- rank cooldown from 0 through 3600 seconds (default 20).
+
+### `guild_command_channels`
+
+Stores one `allow` or `block` classification per guild/channel pair. Reclassification replaces the old rule, and rows cascade with guild configuration.
+
+### `guild_created_roles`
+
+Records only notification roles actually created by the bot after migration 09, keyed by guild and purpose. Only these exact roles are eligible for automatic deletion. Same-named legacy or custom roles are never backfilled or adopted.
 
 ### `leaderboard_slots`
 
@@ -78,6 +91,6 @@ When a lobby disappears from the authoritative upstream list, live Discord refer
 
 ## Write order
 
-Synchronize `users` before `lobbies`, `lobby_rosters`, and `season_ratings`, because those records reference local users.
+Synchronize the authoritative `users` snapshot before `lobbies`, `lobby_rosters`, and `season_ratings`, because those records reference active local users. Ratings and lobby references absent from the same users response are sanitized before dependent writes.
 
 Reject roster user IDs that are not already present locally before writing roster arrays.

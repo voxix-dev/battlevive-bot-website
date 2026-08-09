@@ -1,12 +1,9 @@
 ---
 title: Roles and Identity
-description: Account linking, player roles, rank roles, and role-management requirements.
+description: Account linking, MMR roles, recovery, and role-management requirements.
 ---
 
-Battlevive Bot can assign two kinds of synchronized roles:
-
-- `Battlevive Player` for matched Battlevive users;
-- one rank role based on the player's current-season MMR.
+Battlevive Bot assigns one synchronized MMR tier role based on the player's current-season rating. It no longer creates, assigns, edits, or removes `Battlevive Player`; any existing role and assignments with that name are left untouched.
 
 It can also create two notification roles:
 
@@ -38,7 +35,9 @@ Unsafe existing roles are rejected rather than silently reused.
 
 The bot first uses a previously stored Discord ID when available.
 
-Otherwise it attempts to match the Battlevive `discord_username` against Discord account names and unambiguous display, global, or nickname values. A successful fallback match is stored locally for future synchronizations.
+Otherwise it attempts to match the Battlevive `discord_username` against Discord account names and unambiguous display, global, or nickname values. A successful fallback match is stored in the canonical recovery table and active-user compatibility cache.
+
+If the same upstream UUID disappears and later returns, its Discord link is restored automatically. A different UUID is a new identity: it inherits no old profile, rating, lobby, or role state, though it may claim an inactive stale Discord link after a unique name match. An active user's link cannot be stolen, and ambiguous matches link nobody automatically.
 
 <Callout type="warn" title="Temporary identity risk">
   Username and display-name matching is not identity verification. Do not rely on it in untrusted production communities.
@@ -48,7 +47,7 @@ Otherwise it attempts to match the Battlevive `discord_username` against Discord
 
 Run `/refresh` after creating roles or changing permissions. Manual refresh updates roles only in the server where the command was invoked.
 
-When a member joins, the bot reconciles that member's roles from the local PostgreSQL database. A join does not trigger a Battlevive API request.
+When a member joins, the bot checks PostgreSQL first. Only a miss triggers the coalesced users-and-ratings refresh, after which the current MMR role is applied when available.
 
 ## Roles are not assigned
 
